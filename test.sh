@@ -1,5 +1,3 @@
 #!/bin/bash
 
-make test
-
-./test
+if make test; then ./test; fi
