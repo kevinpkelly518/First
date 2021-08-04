@@ -3,6 +3,7 @@
 #include "Exception.hpp"
 
 #include <algorithm>
+#include <iostream>
 
 void Board::create(const std::string& title) {
   const auto found = std::find(cards.begin(), cards.end(), title);
@@ -14,11 +15,11 @@ void Board::create(const std::string& title) {
   cards.push_back(title);
 }
 
-bool Board::contains(const std::string& title) {
+bool Board::contains(const std::string& title) const {
   return std::find(cards.begin(), cards.end(), title) != cards.end();
 }
 
-bool Board::empty() {
+bool Board::empty() const {
   return cards.empty();
 }
 
@@ -44,4 +45,20 @@ void Board::edit(const std::string& title, const std::string& new_title) {
 
 std::vector<std::string> Board::get_cards() const {
   return cards;
+}
+
+void Board::move(const std::string& title, const int position) {
+  const auto found = std::find(cards.begin(), cards.end(), title);
+
+  if (found == cards.end()) {
+    throw NoCardException();
+  }
+
+  if (position > cards.size()) {
+    throw InvalidIndexException();
+  }
+
+  std::string card = *found;
+  cards.erase(found);
+  cards.insert(cards.begin() + position - 1, card);
 }
