@@ -7,7 +7,7 @@
 void print_board(Board board) {
   std::cout << "Cards in board:" << std::endl;
 
-  for (const auto& card : board.get_cards()) {
+  for (const auto& card : board) {
     std::cout << "\t" << card << std::endl;
   }
 }

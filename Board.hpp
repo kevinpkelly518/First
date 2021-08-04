@@ -11,8 +11,18 @@ public:
   void remove(const std::string& title);
   void edit(const std::string& title, const std::string& new_title);
   void move(const std::string& title, const int position);
-  std::vector<std::string> get_cards() const;
+
+  friend bool operator==(const Board& lhs, const std::vector<std::string>& rhs);
+
+  using container = std::vector<std::string>;
+  using iterator = typename container::iterator;
+  using const_iterator = typename container::const_iterator;
+
+  inline iterator begin() noexcept { return cards.begin(); }
+  inline const_iterator cbegin() const noexcept { return cards.cbegin(); }
+  inline iterator end() noexcept { return cards.end(); }
+  inline const_iterator cend() const noexcept { return cards.cend(); }
 
 private:
-  std::vector<std::string> cards;
+  container cards;
 };

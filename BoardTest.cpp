@@ -57,17 +57,6 @@ TEST_CASE("Card management") {
   }
 }
 
-TEST_CASE("Board Accessors") {
-  Board board;
-  std::vector<std::string> cards{"Title 1", "Title 2", "Title 3"};
-
-  for (const auto& card : cards) {
-    board.create(card);
-  }
-
-  CHECK(board.get_cards() == cards);
-}
-
 TEST_CASE("Card Prioritization") {
   Board board;
 
@@ -88,7 +77,7 @@ TEST_CASE("Card Prioritization") {
       SUBCASE("Two Cards") {
         board.move("Title 2", 1);
 
-        CHECK(board.get_cards() == std::vector<std::string>{"Title 2", "Title"});
+        CHECK(board == std::vector<std::string>{"Title 2", "Title"});
       }
 
       SUBCASE("Three Cards") {
@@ -96,7 +85,7 @@ TEST_CASE("Card Prioritization") {
 
         board.move("Title 3", 1);
 
-        CHECK(board.get_cards() == std::vector<std::string>{"Title 3", "Title", "Title 2"});
+        CHECK(board == std::vector<std::string>{"Title 3", "Title", "Title 2"});
       }
     }
   }
