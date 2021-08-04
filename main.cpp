@@ -17,6 +17,7 @@ void print_action_header() {
   std::cout << "\t1. Create card" << std::endl;
   std::cout << "\t2. Edit card" << std::endl;
   std::cout << "\t3. Remove card" << std::endl;
+  std::cout << "\t4. Move card" << std::endl;
 }
 
 int get_action() {
@@ -59,6 +60,16 @@ void remove_card(Board& board, const std::string& title) {
   }
 }
 
+void move_card(Board& board, const std::string& title, int position) {
+  try {
+    board.move(title, position);
+  } catch (const NoCardException& exception) {
+    std::cout << "Error: selected card does not exist" << std::endl;
+  } catch (const InvalidIndexException& exception) {
+    std::cout << "Error: index exceeds number of cards" << std::endl;
+  }
+}
+
 int main() {
   std::cout << "First Board" << std::endl;
   
@@ -82,6 +93,14 @@ int main() {
       const std::string title = get_input("Enter card title: ");
       remove_card(board, title);
     } break;
+    case 4: {
+      const std::string title = get_input("Enter card title: ");
+      std::cout << "Enter position: " << std::endl;
+      int position;
+      std::cin >> position;
+      move_card(board, title, position);
+      break;
+    }
     default:
       std::cout << "Error: input must be 1, 2, or 3" << std::endl;
     }
