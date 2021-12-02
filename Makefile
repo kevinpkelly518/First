@@ -1,7 +1,17 @@
-.PHONY: all test
+CC = g++
+CFLAGS = -Wall -std=c++11
+OBJECTS = *.cpp
 
-main: Board.cpp main.cpp
-	c++ -std=c++11 $? -o $@
+main: $(OBJECTS)
+	$(CC) $(OBJECTS) -o main $(CFLAGS)
 
-test: BoardTest.cpp Board.cpp
-	c++ -std=c++11 $? -o $@
+run: main
+	./main -nr
+	make clean
+
+test: main
+	./main -e
+	make clean
+
+clean:
+	rm main

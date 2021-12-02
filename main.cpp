@@ -1,3 +1,6 @@
+#define DOCTEST_CONFIG_IMPLEMENT
+#include "doctest.h"
+
 #include "Board.hpp"
 #include "Exception.hpp"
 
@@ -70,7 +73,19 @@ void move_card(Board& board, const std::string& title, int position) {
   }
 }
 
-int main() {
+int main(int argc, char** argv) {
+  doctest::Context context;
+
+  context.applyCommandLine(argc, argv);
+
+  int test_result = context.run();
+
+  if (context.shouldExit()) {
+    return test_result;
+  }
+
+  int client_result = 0;
+
   std::cout << "First Board" << std::endl;
   
   Board board;
@@ -107,4 +122,6 @@ int main() {
 
     print_board(board);
   }
+
+  return test_result + client_result;
 }
