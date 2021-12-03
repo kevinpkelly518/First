@@ -47,7 +47,7 @@ void Board::edit(const std::string& title, const std::string& new_title) {
   *found = new_title;
 }
 
-void Board::move(const std::string& title, const int position) {
+void Board::move(const std::string& title, const unsigned int position) {
   const auto found = std::find(cards.begin(), cards.end(), title);
 
   if (found == cards.end()) {

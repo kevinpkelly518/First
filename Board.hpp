@@ -10,7 +10,7 @@ public:
   bool contains(const std::string& title) const;
   void remove(const std::string& title);
   void edit(const std::string& title, const std::string& new_title);
-  void move(const std::string& title, const int position);
+  void move(const std::string& title, const unsigned int position);
 
   friend bool operator==(const Board& lhs, const std::vector<std::string>& rhs);
 
