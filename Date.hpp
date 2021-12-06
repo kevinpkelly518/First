@@ -140,24 +140,9 @@ struct Date {
   unsigned int day;
 };
 
-int mtoi(const Month& month);
+int mtoi(const Month* month);
 
 bool operator<(const Date& left, const Date& right);
 
 
 } // end namespace First
-
-
-namespace std {
-
-
-template<>
-struct hash<First::Date> {
-  size_t operator()(const First::Date& date) const {
-    return ((hash<unsigned int>()(date.year) ^
-        (hash<unsigned int>()(date.day) << 1)) >> 1); // TODO add hash for month
-  }
-};
-
-
-} // end namespace std
