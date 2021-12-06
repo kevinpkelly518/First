@@ -3,9 +3,9 @@
 #include "Date.hpp"
 #include "Exception.hpp"
 
+#include <map>
 #include <string>
-#include <unordered_map>
-// #include <vector>
+#include <utility>
 
 
 namespace First {
@@ -17,20 +17,17 @@ enum class MealType {
   Dinner
 };
 
-struct Meal {
-  MealType type;
-  std::string meal;
-};
+using MealKey = std::pair<Date, MealType>;
 
 class MealList {
 public:
   bool empty() const;
   int size() const;
-  void add(Date&& date, const MealType& meal_type, const std::string& meal);
-  std::string get(const Date& date, const MealType& meal_type) const;
+  void add(Date&& date, MealType type, const std::string& meal);
+  std::string get(const Date& date, MealType type) const;
 
 private:
-  std::unordered_multimap<Date, Meal> meals;
+  std::map<MealKey, std::string> meals;
 };
 
 

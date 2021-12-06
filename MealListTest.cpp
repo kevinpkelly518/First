@@ -3,8 +3,6 @@
 #include "Date.hpp"
 #include "MealList.hpp"
 
-// TODO meal list and task list separate objects in board?
-
 TEST_CASE("Dates") {
   First::MealList meal_list;
 
