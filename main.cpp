@@ -1,16 +1,16 @@
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
 
-#include "Board.hpp"
+#include "TaskList.hpp"
 #include "Exception.hpp"
 
 #include <iostream>
 #include <string>
 
-void print_board(Board board) {
-  std::cout << "Cards in board:" << std::endl;
+void print_task_list(First::TaskList task_list) {
+  std::cout << "Cards in task_list:" << std::endl;
 
-  for (const auto& card : board) {
+  for (const auto& card : task_list) {
     std::cout << "\t" << card << std::endl;
   }
 }
@@ -39,33 +39,33 @@ std::string get_input(const std::string& prompt) {
   return input;
 }
 
-void create_card(Board& board, const std::string& title) {
+void create_card(First::TaskList& task_list, const std::string& title) {
   try {
-    board.create(title);
+    task_list.add(title);
   } catch (const ExistingCardException& exception) {
     std::cout << "Error: card already exists" << std::endl;
   }
 }
 
-void edit_card(Board& board, const std::string& title, const std::string& new_title) {
+void edit_card(First::TaskList& task_list, const std::string& title, const std::string& new_title) {
   try {
-    board.edit(title, new_title);
+    task_list.edit(title, new_title);
   } catch (const NoCardException& exception) {
     std::cout << "Error: selected card does not exist" << std::endl;
   }
 }
 
-void remove_card(Board& board, const std::string& title) {
+void remove_card(First::TaskList& task_list, const std::string& title) {
   try {
-    board.remove(title);
+    task_list.erase(title);
   } catch (const NoCardException& exception) {
     std::cout << "Error: selected card does not exist" << std::endl;
   }
 }
 
-void move_card(Board& board, const std::string& title, int position) {
+void move_card(First::TaskList& task_list, const std::string& title, int position) {
   try {
-    board.move(title, position);
+    task_list.move(title, position);
   } catch (const NoCardException& exception) {
     std::cout << "Error: selected card does not exist" << std::endl;
   } catch (const InvalidIndexException& exception) {
@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
 
   std::cout << "First Board" << std::endl;
   
-  Board board;
+  First::TaskList task_list;
 
   while (true) {
     print_action_header();
@@ -97,30 +97,30 @@ int main(int argc, char** argv) {
     switch (action) {
     case 1: {
       const std::string title = get_input("Enter card title: ");
-      create_card(board, title);
+      create_card(task_list, title);
     } break;
     case 2: {
       const std::string title = get_input("Enter card title: ");
       const std::string new_title = get_input("Enter new card title: ");
-      edit_card(board, title, new_title);
+      edit_card(task_list, title, new_title);
     } break;
     case 3: {
       const std::string title = get_input("Enter card title: ");
-      remove_card(board, title);
+      remove_card(task_list, title);
     } break;
     case 4: {
       const std::string title = get_input("Enter card title: ");
       std::cout << "Enter position: " << std::endl;
       int position;
       std::cin >> position;
-      move_card(board, title, position);
+      move_card(task_list, title, position);
       break;
     }
     default:
       std::cout << "Error: input must be 1, 2, or 3" << std::endl;
     }
 
-    print_board(board);
+    print_task_list(task_list);
   }
 
   return test_result + client_result;
