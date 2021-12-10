@@ -7,29 +7,29 @@ namespace First {
 std::unique_ptr<Month> Month::make(unsigned int year, unsigned int month) {
   switch (month) {
     case 1:
-      return std::unique_ptr<January>(new January());
+      return std::make_unique<January>();
     case 2:
-      return std::unique_ptr<February>(new February(year));
+      return std::make_unique<February>(year);
     case 3:
-      return std::unique_ptr<March>(new March());
+      return std::make_unique<March>();
     case 4:
-      return std::unique_ptr<April>(new April());
+      return std::make_unique<April>();
     case 5:
-      return std::unique_ptr<May>(new May());
+      return std::make_unique<May>();
     case 6:
-      return std::unique_ptr<June>(new June());
+      return std::make_unique<June>();
     case 7:
-      return std::unique_ptr<July>(new July());
+      return std::make_unique<July>();
     case 8:
-      return std::unique_ptr<August>(new August());
+      return std::make_unique<August>();
     case 9:
-      return std::unique_ptr<September>(new September());
+      return std::make_unique<September>();
     case 10:
-      return std::unique_ptr<October>(new October());
+      return std::make_unique<October>();
     case 11:
-      return std::unique_ptr<November>(new November());
+      return std::make_unique<November>();
     case 12:
-      return std::unique_ptr<December>(new December());
+      return std::make_unique<December>();
     default:
       throw InvalidDateException();
   }

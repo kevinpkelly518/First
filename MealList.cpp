@@ -3,6 +3,7 @@
 #include "Exception.hpp"
 
 #include <algorithm>
+#include <stdexcept>
 
 
 namespace First {
