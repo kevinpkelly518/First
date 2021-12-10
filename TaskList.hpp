@@ -9,6 +9,8 @@ namespace First {
 
 class TaskList {
 public:
+  std::vector<std::string> get() const;
+
   void add(const std::string& title);
   bool empty() const;
   bool contains(const std::string& title) const;

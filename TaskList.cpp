@@ -13,10 +13,12 @@ bool operator==(const TaskList& lhs, const std::vector<std::string>& rhs) {
   return lhs.tasks == rhs;
 }
 
-void TaskList::add(const std::string& title) {
-  const auto found = std::find(tasks.begin(), tasks.end(), title);
+std::vector<std::string> TaskList::get() const {
+  return tasks;
+}
 
-  if (found != tasks.end()) {
+void TaskList::add(const std::string& title) {
+  if (contains(title)) {
     throw ExistingCardException();
   }
 
@@ -32,29 +34,33 @@ bool TaskList::empty() const {
 }
 
 void TaskList::erase(const std::string& title) {
-  const auto found = std::find(tasks.begin(), tasks.end(), title);
+  const auto task = std::find(tasks.begin(), tasks.end(), title);
 
-  if (found == tasks.end()) {
+  if (task == tasks.end()) {
     throw NoCardException();
   }
 
-  tasks.erase(found);
+  tasks.erase(task);
 }
 
 void TaskList::edit(const std::string& title, const std::string& new_title) {
-  const auto found = std::find(tasks.begin(), tasks.end(), title);
+  const auto task = std::find(tasks.begin(), tasks.end(), title);
 
-  if (found == tasks.end()) {
+  if (task == tasks.end()) {
     throw NoCardException();
   }
 
-  *found = new_title;
+  if (contains(new_title)) {
+    throw ExistingCardException();
+  }
+
+  *task = new_title;
 }
 
 void TaskList::move(const std::string& title, const unsigned int position) {
-  const auto found = std::find(tasks.begin(), tasks.end(), title);
+  const auto task = std::find(tasks.begin(), tasks.end(), title);
 
-  if (found == tasks.end()) {
+  if (task == tasks.end()) {
     throw NoCardException();
   }
 
@@ -62,8 +68,8 @@ void TaskList::move(const std::string& title, const unsigned int position) {
     throw InvalidIndexException();
   }
 
-  std::string card = *found;
-  tasks.erase(found);
+  std::string card = *task;
+  tasks.erase(task);
   tasks.insert(tasks.begin() + position - 1, card);
 }
 

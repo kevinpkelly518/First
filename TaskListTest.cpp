@@ -53,6 +53,12 @@ TEST_CASE("Card management") {
     SUBCASE("Edit nonexistent card") {
       CHECK_THROWS_AS(task_list.edit("Test", "Title"), NoCardException);
     }
+
+    SUBCASE("Edit to existing card") {
+      task_list.add("Test");
+
+      CHECK_THROWS_AS(task_list.edit("Test", "Title"), ExistingCardException);
+    }
   }
 }
 
