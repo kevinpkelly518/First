@@ -1,5 +1,7 @@
 #include "Date.hpp"
 
+#include <sstream>
+
 
 namespace First {
 
@@ -105,6 +107,13 @@ Date& Date::operator=(const Date& other) {
   day = other.day;
 
   return *this;
+}
+
+std::string Date::to_string() const {
+  std::ostringstream oss;
+  oss << year << " " << mtoi(month.get()) << " " << day;
+
+  return oss.str();
 }
 
 int mtoi(const Month* month) {

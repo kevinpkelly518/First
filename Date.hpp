@@ -134,6 +134,7 @@ struct Date {
   Date& operator=(const Date& other);
   Date& operator=(Date&& other) = default;
 
+  std::string to_string() const;
 
   unsigned int year;
   std::unique_ptr<Month> month;

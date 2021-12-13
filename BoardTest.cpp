@@ -1,12 +1,31 @@
 #include "doctest.h"
 
 #include "Board.hpp"
+#include "MealList.hpp"
 
 #include <memory>
 
 
 namespace {
 
+
+class TaskListenerSpy : public First::TaskListener {
+public:
+  void notify(const std::vector<std::string>& t) override {
+    tasks = t;
+  }
+
+  std::vector<std::string> tasks;
+};
+
+class MealListenerSpy : public First::MealListener {
+public:
+  void notify(const std::vector<std::vector<std::string>>& m) override {
+    meals = m;
+  }
+
+  std::vector<std::vector<std::string>> meals;
+};
 
 class ExceptionListenerSpy : public First::ExceptionListener {
 public:
@@ -17,17 +36,12 @@ public:
   std::string key;
 };
 
-class BoardChangeListenerSpy : public First::BoardChangeListener {
-public:
-  void notify(const std::vector<std::string>& b) override {
-    board = b;
-  }
+void check_board(First::TaskListener* listener, const std::vector<std::string>& expect) {
+  CHECK(dynamic_cast<TaskListenerSpy*>(listener)->tasks == expect);
+}
 
-  std::vector<std::string> board;
-};
-
-void check_board(First::BoardChangeListener* listener, const std::vector<std::string>& expect) {
-  CHECK(dynamic_cast<BoardChangeListenerSpy*>(listener)->board == expect);
+void check_meal(First::MealListener* listener, const std::vector<std::vector<std::string>>& expect) {
+  CHECK(dynamic_cast<MealListenerSpy*>(listener)->meals == expect);
 }
 
 void check_exception(First::ExceptionListener* listener, const std::string& expect) {
@@ -38,61 +52,83 @@ void check_exception(First::ExceptionListener* listener, const std::string& expe
 } // end namespace
 
 
-TEST_CASE("Board") {
-  First::Board board;
-
-  const auto board_change_listener = std::make_unique<BoardChangeListenerSpy>();
-  board.register_board_change_listener(board_change_listener.get());
-
+TEST_CASE("Board Tasks") {
+  const auto task_listener = std::make_unique<TaskListenerSpy>();
+  const auto meal_listener = std::make_unique<MealListenerSpy>();
   const auto exception_listener = std::make_unique<ExceptionListenerSpy>();
-  board.register_exception_listener(exception_listener.get());
 
-  SUBCASE("Add") {
+  First::Board board(task_listener.get(), meal_listener.get(), exception_listener.get());
+
+  SUBCASE("Tasks") {
     board.add_task("Task");
 
-    check_board(board_change_listener.get(), {"Task"});
+    check_board(task_listener.get(), {"Task"});
 
     SUBCASE("Erase") {
       board.erase_task("Task");
 
-      check_board(board_change_listener.get(), {});
+      check_board(task_listener.get(), {});
     }
 
     SUBCASE("Edit") {
       board.edit_task("Task", "Edit");
 
-      check_board(board_change_listener.get(), {"Edit"});
+      check_board(task_listener.get(), {"Edit"});
     }
 
     SUBCASE("Move") {
       board.add_task("Task2");
       board.move_task("Task", 2);
 
-      check_board(board_change_listener.get(), {"Task2", "Task"});
+      check_board(task_listener.get(), {"Task2", "Task"});
+    }
+  }
+
+  SUBCASE("Meals") {
+    board.add_meal({2021, 12, 16}, First::MealType::Breakfast, "Meal");
+
+    check_meal(meal_listener.get(), {{"2021 12 16", "Breakfast", "Meal"}});
+
+    SUBCASE("Erase") {
+      board.erase_meal({2021, 12, 16}, First::MealType::Breakfast);
+
+      check_meal(meal_listener.get(), {});
+    }
+
+    SUBCASE("Edit Meal") {
+      board.edit_meal({2021, 12, 16}, First::MealType::Breakfast, "Cake");
+
+      check_meal(meal_listener.get(), {{"2021 12 16", "Breakfast", "Cake"}});
+    }
+
+    SUBCASE("Edit Key") {
+      board.edit_meal({2021, 12, 16}, First::MealType::Breakfast, {2021, 12, 17}, First::MealType::Lunch);
+
+      check_meal(meal_listener.get(), {{"2021 12 17", "Lunch", "Meal"}});
     }
   }
 
   SUBCASE("Exceptions") {
-    SUBCASE("Add") {
+    SUBCASE("Add Task") {
       board.add_task("Task");
       board.add_task("Task");
 
       check_exception(exception_listener.get(), "ExistingCard");
     }
 
-    SUBCASE("Erase") {
+    SUBCASE("Erase Task") {
       board.erase_task("Task");
 
       check_exception(exception_listener.get(), "NoCard");
     }
 
-    SUBCASE("Edit") {
+    SUBCASE("Edit Nonexistent Task") {
       board.edit_task("Task", "Edit");
 
       check_exception(exception_listener.get(), "NoCard");
     }
 
-    SUBCASE("Edit") {
+    SUBCASE("Edit To Existing Task") {
       board.add_task("Task1");
       board.add_task("Task2");
 
@@ -101,18 +137,60 @@ TEST_CASE("Board") {
       check_exception(exception_listener.get(), "ExistingCard");
     }
 
-    SUBCASE("Move") {
+    SUBCASE("Move Nonexistent Task") {
       board.move_task("Task", 1);
 
       check_exception(exception_listener.get(), "NoCard");
     }
 
-    SUBCASE("Move") {
+    SUBCASE("Move Task To Invalid Index") {
       board.add_task("Task");
 
       board.move_task("Task", 2);
 
       check_exception(exception_listener.get(), "InvalidIndex");
+    }
+
+    SUBCASE("Erase Meal") {
+      board.erase_meal({2021, 12, 16}, First::MealType::Breakfast);
+
+      check_exception(exception_listener.get(), "NoMeal");
+    }
+
+    SUBCASE("Edit Meal") {
+      board.edit_meal({2021, 12, 16}, First::MealType::Breakfast, "Meal");
+
+      check_exception(exception_listener.get(), "NoMeal");
+    }
+
+    SUBCASE("Edit Meal Key") {
+      board.edit_meal({2021, 12, 16}, First::MealType::Breakfast, {2021, 12, 16}, First::MealType::Lunch);
+
+      check_exception(exception_listener.get(), "NoMeal");
+    }
+
+    SUBCASE("Edit To Existing Meal Type") {
+      board.add_meal({2021, 12, 16}, First::MealType::Breakfast, "Meal1");
+      board.add_meal({2021, 12, 16}, First::MealType::Lunch, "Meal2");
+
+      board.edit_meal({2021, 12, 16}, First::MealType::Breakfast, {2021, 12, 16}, First::MealType::Lunch);
+
+      check_exception(exception_listener.get(), "ExistingMeal");
+    }
+
+    SUBCASE("Edit Nonexistent Meal Date") {
+      board.edit_meal({2021, 12, 16}, First::MealType::Breakfast, {2021, 12, 17}, First::MealType::Breakfast);
+
+      check_exception(exception_listener.get(), "NoMeal");
+    }
+
+    SUBCASE("Edit To Existing Meal Date") {
+      board.add_meal({2021, 12, 16}, First::MealType::Breakfast, "Meal1");
+      board.add_meal({2021, 12, 17}, First::MealType::Breakfast, "Meal2");
+
+      board.edit_meal({2021, 12, 16}, First::MealType::Breakfast, {2021, 12, 17}, First::MealType::Breakfast);
+
+      check_exception(exception_listener.get(), "ExistingMeal");
     }
   }
 }

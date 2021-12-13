@@ -79,8 +79,7 @@ TEST_CASE("Edit Meal") {
 
   SUBCASE("Nonexistent Entry") {
     CHECK_THROWS_AS(meal_list.edit({2021, 12, 16}, First::MealType::Dinner, "Cake"), NoMealException);
-    CHECK_THROWS_AS(meal_list.edit({2021, 12, 16}, First::MealType::Dinner, First::Date{2021, 1, 1}), NoMealException);
-    CHECK_THROWS_AS(meal_list.edit({2021, 12, 16}, First::MealType::Dinner, First::MealType::Breakfast), NoMealException);
+    CHECK_THROWS_AS(meal_list.edit({2021, 12, 16}, First::MealType::Dinner, {2021, 1, 1}, First::MealType::Breakfast), NoMealException);
   }
 
   SUBCASE("Edit") {
@@ -94,24 +93,23 @@ TEST_CASE("Edit Meal") {
     }
 
     SUBCASE("Edit Meal Type") {
-      meal_list.edit({2021, 12, 16}, First::MealType::Dinner, First::MealType::Breakfast);
+      meal_list.edit({2021, 12, 16}, First::MealType::Dinner, {2021, 12, 16}, First::MealType::Breakfast);
 
       CHECK(meal_list.size() == 1);
       CHECK(meal_list.get({2021, 12, 16}, First::MealType::Breakfast) == "Cake");
     }
 
     SUBCASE("Edit Date") {
-      meal_list.edit({2021, 12, 16}, First::MealType::Dinner, First::Date{2021, 1, 1});
+      meal_list.edit({2021, 12, 16}, First::MealType::Dinner, {2021, 1, 1}, First::MealType::Dinner);
 
       CHECK(meal_list.size() == 1);
       CHECK(meal_list.get({2021, 1, 1}, First::MealType::Dinner) == "Cake");
     }
 
     SUBCASE("Edit To Existing Key") {
-      meal_list.add({2021, 12, 17}, First::MealType::Dinner, "Pizza");
+      meal_list.add({2021, 12, 17}, First::MealType::Lunch, "Pizza");
 
-      CHECK_THROWS_AS(meal_list.edit({2021, 12, 17}, First::MealType::Dinner, First::Date{2021, 12, 16}), ExistingMealException);
-      CHECK_THROWS_AS(meal_list.edit({2021, 12, 17}, First::MealType::Dinner, First::MealType::Dinner), ExistingMealException);
+      CHECK_THROWS_AS(meal_list.edit({2021, 12, 17}, First::MealType::Lunch, {2021, 12, 16}, First::MealType::Dinner), ExistingMealException);
     }
   }
 }
