@@ -30,7 +30,7 @@ public:
   void edit(const Date& date, MealType type, const std::string& new_meal);
   void erase(const Date& date, MealType type);
 
-  std::vector<std::vector<std::string>> get() const;
+  std::vector<std::vector<std::string>> to_string() const;
 
   inline std::map<MealKey, std::string>::iterator begin() noexcept { return meals.begin(); }
   inline std::map<MealKey, std::string>::const_iterator cbegin() const noexcept { return meals.cbegin(); }

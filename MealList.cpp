@@ -84,7 +84,7 @@ void MealList::erase(const Date& date, MealType type) {
   meals.erase(meal);
 }
 
-std::vector<std::vector<std::string>> MealList::get() const {
+std::vector<std::vector<std::string>> MealList::to_string() const {
   std::vector<std::vector<std::string>> meal_list;
 
   for (const auto& [key, value] : meals) {

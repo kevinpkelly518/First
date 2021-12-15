@@ -15,7 +15,7 @@ class TaskListener {
 public:
   virtual ~TaskListener() = default;
 
-  virtual void notify(const std::vector<std::string>& task_list) = 0;
+  virtual void notify(const std::vector<std::pair<std::string, std::string>>& task_list) = 0;
 };
 
 class MealListener {
@@ -40,6 +40,10 @@ public:
   void erase_task(const std::string& task);
   void edit_task(const std::string& task, const std::string& new_task);
   void move_task(const std::string& task, unsigned int position);
+  void complete_task(const std::string& task);
+  void incomplete_task(const std::string& task);
+  void clear_complete();
+  void undo_clear();
 
   void add_meal(const Date& date, MealType type, const std::string& meal);
   void erase_meal(const Date& date, MealType type);
@@ -47,8 +51,14 @@ public:
   void edit_meal(const Date& date, MealType type, const Date& new_date, MealType new_type);
 
 private:
-  TaskList task_list;
+  void notify_task_change();
+
+  TaskList incompleted_task_list;
+  TaskList completed_task_list;
+  std::vector<std::string> cleared_tasks;
+
   MealList meal_list;
+
   TaskListener* task_listener;
   MealListener* meal_listener;
   ExceptionListener* exception_listener;

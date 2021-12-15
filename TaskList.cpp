@@ -13,13 +13,13 @@ bool operator==(const TaskList& lhs, const std::vector<std::string>& rhs) {
   return lhs.tasks == rhs;
 }
 
-std::vector<std::string> TaskList::get() const {
+std::vector<std::string> TaskList::to_string() const {
   return tasks;
 }
 
 void TaskList::add(const std::string& title) {
   if (contains(title)) {
-    throw ExistingCardException();
+    throw ExistingTaskException();
   }
 
   tasks.push_back(title);
@@ -37,7 +37,7 @@ void TaskList::erase(const std::string& title) {
   const auto task = std::find(tasks.begin(), tasks.end(), title);
 
   if (task == tasks.end()) {
-    throw NoCardException();
+    throw NoTaskException();
   }
 
   tasks.erase(task);
@@ -47,11 +47,11 @@ void TaskList::edit(const std::string& title, const std::string& new_title) {
   const auto task = std::find(tasks.begin(), tasks.end(), title);
 
   if (task == tasks.end()) {
-    throw NoCardException();
+    throw NoTaskException();
   }
 
   if (contains(new_title)) {
-    throw ExistingCardException();
+    throw ExistingTaskException();
   }
 
   *task = new_title;
@@ -61,7 +61,7 @@ void TaskList::move(const std::string& title, const unsigned int position) {
   const auto task = std::find(tasks.begin(), tasks.end(), title);
 
   if (task == tasks.end()) {
-    throw NoCardException();
+    throw NoTaskException();
   }
 
   if (position > tasks.size()) {
@@ -71,6 +71,10 @@ void TaskList::move(const std::string& title, const unsigned int position) {
   std::string card = *task;
   tasks.erase(task);
   tasks.insert(tasks.begin() + position - 1, card);
+}
+
+void TaskList::clear() {
+  tasks.clear();
 }
 
 

@@ -19,7 +19,7 @@ TEST_CASE("Card management") {
     }
 
     SUBCASE("Same name") {
-      CHECK_THROWS_AS(task_list.add("Title"), ExistingCardException);
+      CHECK_THROWS_AS(task_list.add("Title"), ExistingTaskException);
     }
 
     SUBCASE("Nonexistent card") {
@@ -40,7 +40,7 @@ TEST_CASE("Card management") {
     }
 
     SUBCASE("Remove nonexistent card") {
-      CHECK_THROWS_AS(task_list.erase("Test"), NoCardException);
+      CHECK_THROWS_AS(task_list.erase("Test"), NoTaskException);
     }
 
     SUBCASE("Edit card") {
@@ -51,13 +51,13 @@ TEST_CASE("Card management") {
     }
 
     SUBCASE("Edit nonexistent card") {
-      CHECK_THROWS_AS(task_list.edit("Test", "Title"), NoCardException);
+      CHECK_THROWS_AS(task_list.edit("Test", "Title"), NoTaskException);
     }
 
     SUBCASE("Edit to existing card") {
       task_list.add("Test");
 
-      CHECK_THROWS_AS(task_list.edit("Test", "Title"), ExistingCardException);
+      CHECK_THROWS_AS(task_list.edit("Test", "Title"), ExistingTaskException);
     }
   }
 }
@@ -66,7 +66,7 @@ TEST_CASE("Card Prioritization") {
   First::TaskList task_list;
 
   SUBCASE("Nonexistent card") {
-    CHECK_THROWS_AS(task_list.move("Test", 1), NoCardException);
+    CHECK_THROWS_AS(task_list.move("Test", 1), NoTaskException);
   }
 
   SUBCASE("Move Cards") {

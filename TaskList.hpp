@@ -9,7 +9,7 @@ namespace First {
 
 class TaskList {
 public:
-  std::vector<std::string> get() const;
+  std::vector<std::string> to_string() const;
 
   void add(const std::string& title);
   bool empty() const;
@@ -17,6 +17,7 @@ public:
   void erase(const std::string& title);
   void edit(const std::string& title, const std::string& new_title);
   void move(const std::string& title, const unsigned int position);
+  void clear();
 
   friend bool operator==(const TaskList& left, const std::vector<std::string>& right);
 
