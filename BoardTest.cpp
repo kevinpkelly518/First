@@ -11,11 +11,11 @@ namespace {
 
 class TaskListenerSpy : public First::TaskListener {
 public:
-  void notify(const std::vector<std::pair<std::string, std::string>>& t) override {
-    tasks = t;
+  void notify(const First::TaskAddedEvent& t) override {
+    task = t;
   }
 
-  std::vector<std::pair<std::string, std::string>> tasks;
+  First::TaskAddedEvent task;
 };
 
 class MealListenerSpy : public First::MealListener {
@@ -36,8 +36,8 @@ public:
   std::string key;
 };
 
-void check_tasks(First::TaskListener* listener, const std::vector<std::pair<std::string, std::string>>& expect) {
-  CHECK(dynamic_cast<TaskListenerSpy*>(listener)->tasks == expect);
+void check_task(First::TaskListener* listener, const First::TaskAddedEvent& expect) {
+  CHECK(dynamic_cast<TaskListenerSpy*>(listener)->task == expect);
 }
 
 void check_meal(First::MealListener* listener, const std::vector<std::vector<std::string>>& expect) {
@@ -59,58 +59,73 @@ TEST_CASE("Board Tasks") {
 
   First::Board board(task_listener.get(), meal_listener.get(), exception_listener.get());
 
-  SUBCASE("Tasks") {
-    board.add_task("Task");
+  SUBCASE("Add Tasks") {
+    board.add_task();
+    check_task(task_listener.get(), {1, {{}, "New"}});
 
-    check_tasks(task_listener.get(), {std::make_pair("Task", "Incomplete")});
+    board.add_task();
+    check_task(task_listener.get(), {2, {{}, "New"}});
 
-    SUBCASE("Erase") {
-      board.erase_task("Task");
-
-      check_tasks(task_listener.get(), {});
-    }
-
-    SUBCASE("Edit") {
-      board.edit_task("Task", "Edit");
-
-      check_tasks(task_listener.get(), {std::make_pair("Edit", "Incomplete")});
-    }
-
-    SUBCASE("Move") {
-      board.add_task("Task2");
-      board.move_task("Task", 2);
-
-      check_tasks(task_listener.get(), {std::make_pair("Task2", "Incomplete"), std::make_pair("Task", "Incomplete")});
-    }
-
-    SUBCASE("Complete") {
-      board.complete_task("Task");
-
-      check_tasks(task_listener.get(), {std::make_pair("Task", "Complete")});
-    }
-
-    SUBCASE("Incomplete") {
-      board.complete_task("Task");
-      board.incomplete_task("Task");
-
-      check_tasks(task_listener.get(), {std::make_pair("Task", "Incomplete")});
-    }
-
-    SUBCASE("Clear Complete") {
-      board.complete_task("Task");
-      board.clear_complete();
-
-      check_tasks(task_listener.get(), {});
-    }
-
-    SUBCASE("Undo Clear") {
-      board.complete_task("Task");
-      board.clear_complete();
-      board.undo_clear();
-
-      check_tasks(task_listener.get(), {std::make_pair("Task", "Complete")});
-    }
+    board.add_task({2021, 12, 16});
+    check_task(task_listener.get(), {3, {First::Date{2021, 12, 16}, "New"}});
   }
+
+  // SUBCASE("Erase Tasks") {
+  //   board.add_task();
+
+  //   unsigned int id = task_listener->task.id;
+  //   board.erase_task(id);
+
+  //   check_task(task_listener.get(), {});
+  // }
+
+    // SUBCASE("Erase") {
+    //   board.erase_task("Task");
+
+    //   check_tasks(task_listener.get(), {});
+    // }
+
+    // SUBCASE("Edit") {
+    //   board.edit_task("Task", "Edit");
+
+    //   check_tasks(task_listener.get(), {std::make_pair("Edit", "Incomplete")});
+    // }
+
+    // SUBCASE("Move") {
+    //   board.add_task("Task2");
+    //   board.move_task("Task", 2);
+
+    //   check_tasks(task_listener.get(), {std::make_pair("Task2", "Incomplete"), std::make_pair("Task", "Incomplete")});
+    // }
+
+    // SUBCASE("Complete") {
+    //   board.complete_task("Task");
+
+    //   check_tasks(task_listener.get(), {std::make_pair("Task", "Complete")});
+    // }
+
+    // SUBCASE("Incomplete") {
+    //   board.complete_task("Task");
+    //   board.incomplete_task("Task");
+
+    //   check_tasks(task_listener.get(), {std::make_pair("Task", "Incomplete")});
+    // }
+
+    // SUBCASE("Clear Complete") {
+    //   board.complete_task("Task");
+    //   board.clear_complete();
+
+    //   check_tasks(task_listener.get(), {});
+    // }
+
+    // SUBCASE("Undo Clear") {
+    //   board.complete_task("Task");
+    //   board.clear_complete();
+    //   board.undo_clear();
+
+    //   check_tasks(task_listener.get(), {std::make_pair("Task", "Complete")});
+    // }
+  // }
 
   SUBCASE("Meals") {
     board.add_meal({2021, 12, 16}, First::MealType::Breakfast, "Meal");
@@ -137,59 +152,59 @@ TEST_CASE("Board Tasks") {
   }
 
   SUBCASE("Exceptions") {
-    SUBCASE("Add Task") {
-      board.add_task("Task");
-      board.add_task("Task");
+    // SUBCASE("Add Task") {
+    //   board.add_task("Task");
+    //   board.add_task("Task");
 
-      check_exception(exception_listener.get(), "ExistingTask");
-    }
+    //   check_exception(exception_listener.get(), "ExistingTask");
+    // }
 
-    SUBCASE("Erase Task") {
-      board.erase_task("Task");
+    // SUBCASE("Erase Task") {
+    //   board.erase_task("Task");
 
-      check_exception(exception_listener.get(), "NoTask");
-    }
+    //   check_exception(exception_listener.get(), "NoTask");
+    // }
 
-    SUBCASE("Edit Nonexistent Task") {
-      board.edit_task("Task", "Edit");
+    // SUBCASE("Edit Nonexistent Task") {
+    //   board.edit_task("Task", "Edit");
 
-      check_exception(exception_listener.get(), "NoTask");
-    }
+    //   check_exception(exception_listener.get(), "NoTask");
+    // }
 
-    SUBCASE("Edit To Existing Task") {
-      board.add_task("Task1");
-      board.add_task("Task2");
+    // SUBCASE("Edit To Existing Task") {
+    //   board.add_task("Task1");
+    //   board.add_task("Task2");
 
-      board.edit_task("Task1", "Task2");
+    //   board.edit_task("Task1", "Task2");
 
-      check_exception(exception_listener.get(), "ExistingTask");
-    }
+    //   check_exception(exception_listener.get(), "ExistingTask");
+    // }
 
-    SUBCASE("Move Nonexistent Task") {
-      board.move_task("Task", 1);
+    // SUBCASE("Move Nonexistent Task") {
+    //   board.move_task("Task", 1);
 
-      check_exception(exception_listener.get(), "NoTask");
-    }
+    //   check_exception(exception_listener.get(), "NoTask");
+    // }
 
-    SUBCASE("Move Task To Invalid Index") {
-      board.add_task("Task");
+    // SUBCASE("Move Task To Invalid Index") {
+    //   board.add_task("Task");
 
-      board.move_task("Task", 2);
+    //   board.move_task("Task", 2);
 
-      check_exception(exception_listener.get(), "InvalidIndex");
-    }
+    //   check_exception(exception_listener.get(), "InvalidIndex");
+    // }
 
-    SUBCASE("Complete Task") {
-      board.complete_task("Task");
+    // SUBCASE("Complete Task") {
+    //   board.complete_task("Task");
 
-      check_exception(exception_listener.get(), "NoTask");
-    }
+    //   check_exception(exception_listener.get(), "NoTask");
+    // }
 
-    SUBCASE("Incomplete Task") {
-      board.incomplete_task("Task");
+    // SUBCASE("Incomplete Task") {
+    //   board.incomplete_task("Task");
 
-      check_exception(exception_listener.get(), "NoTask");
-    }
+    //   check_exception(exception_listener.get(), "NoTask");
+    // }
 
     SUBCASE("Erase Meal") {
       board.erase_meal({2021, 12, 16}, First::MealType::Breakfast);

@@ -162,5 +162,9 @@ bool operator<(const Date& left, const Date& right) {
   return left.day < right.day;
 }
 
+bool operator==(const Date& left, const Date& right) {
+  return left.year == right.year && mtoi(left.month.get()) == mtoi(right.month.get()) && left.day == right.day;
+}
+
 
 } // end namespace First

@@ -144,6 +144,7 @@ struct Date {
 int mtoi(const Month* month);
 
 bool operator<(const Date& left, const Date& right);
+bool operator==(const Date& left, const Date& right);
 
 
 } // end namespace First

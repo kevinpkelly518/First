@@ -6,6 +6,7 @@
 #include "Exception.hpp"
 
 #include <iostream>
+#include <map>
 #include <string>
 
 
@@ -15,17 +16,18 @@ namespace {
 void print_action_header() {
   std::cout << "\t1. Tasks" << std::endl;
   std::cout << "\t2. Meals" << std::endl;
+  std::cout << "\t3. Print Tasks" << std::endl;
 }
 
 void print_task_header() {
   std::cout << "\t1. Add task" << std::endl;
-  std::cout << "\t2. Edit task" << std::endl;
-  std::cout << "\t3. Remove task" << std::endl;
-  std::cout << "\t4. Move task" << std::endl;
-  std::cout << "\t5. Complete task" << std::endl;
-  std::cout << "\t6. Incomplete task" << std::endl;
-  std::cout << "\t7. Clear completed tasks" << std::endl;
-  std::cout << "\t8. Undo clear" << std::endl;
+  // std::cout << "\t2. Edit task" << std::endl;
+  // std::cout << "\t3. Remove task" << std::endl;
+  // std::cout << "\t4. Move task" << std::endl;
+  // std::cout << "\t5. Complete task" << std::endl;
+  // std::cout << "\t6. Incomplete task" << std::endl;
+  // std::cout << "\t7. Clear completed tasks" << std::endl;
+  // std::cout << "\t8. Undo clear" << std::endl;
 }
 
 void print_meal_header() {
@@ -62,15 +64,12 @@ First::MealType get_type(const std::string& type) {
 
 class MainTaskListener : public First::TaskListener {
 public:
-  void notify(const std::vector<std::pair<std::string, std::string>>& tasks) override {
-    std::cout << std::endl << "Tasks:" << std::endl;
-
-    for (const auto& task : tasks) {
-      std::cout << "\t" << task.first << "\t" << task.second << std::endl;
-    }
-
-    std::cout << std::endl;
+  void notify(const First::TaskAddedEvent& task) override {
+    std::cout << "Task Added" << std::endl;
+    received_id = task.id;
   }
+
+  unsigned int received_id = 0;
 };
 
 class MainMealListener : public First::MealListener {
@@ -93,47 +92,50 @@ public:
   }
 };
 
-void manage_tasks(First::Board& board) {
+void manage_tasks(First::Board& board, First::TaskListener* task_listener, std::map<std::string, unsigned int>& tasks) {
   print_task_header();
   const int action = get_input<int>("Select action: ");
 
   switch (action) {
-  case 1:
-    board.add_task(get_input<std::string>("Enter task: "));
-
-    break;
-  case 2: {
-    const std::string task = get_input<std::string>("Enter task: ");
-    const std::string new_task = get_input<std::string>("Enter new task: ");
-    board.edit_task(task, new_task);
+  case 1: {
+    const auto task = get_input<std::string>("Enter task: ");
+    board.add_task();
+    tasks[task] = dynamic_cast<MainTaskListener*>(task_listener)->received_id;
 
     break;
   }
-  case 3:
-    board.erase_task(get_input<std::string>("Enter task: "));
+  // case 2: {
+  //   const std::string task = get_input<std::string>("Enter task: ");
+  //   const std::string new_task = get_input<std::string>("Enter new task: ");
+  //   board.edit_task(task, new_task);
 
-    break;
-  case 4: {
-    const std::string task = get_input<std::string>("Enter task: ");
-    const int position = get_input<int>("Enter position: ");
-    board.move_task(task, position);
+  //   break;
+  // }
+  // case 3:
+  //   board.erase_task(get_input<std::string>("Enter task: "));
 
-    break;
-  }
-  case 5:
-    board.complete_task(get_input<std::string>("Enter task: "));
-    break;
-  case 6:
-    board.incomplete_task(get_input<std::string>("Enter task: "));
-    break;
-  case 7:
-    board.clear_complete();
-    break;
-  case 8:
-    board.undo_clear();
-    break;
+  //   break;
+  // case 4: {
+  //   const std::string task = get_input<std::string>("Enter task: ");
+  //   const int position = get_input<int>("Enter position: ");
+  //   board.move_task(task, position);
+
+  //   break;
+  // }
+  // case 5:
+  //   board.complete_task(get_input<std::string>("Enter task: "));
+  //   break;
+  // case 6:
+  //   board.incomplete_task(get_input<std::string>("Enter task: "));
+  //   break;
+  // case 7:
+  //   board.clear_complete();
+  //   break;
+  // case 8:
+  //   board.undo_clear();
+  //   break;
   default:
-    std::cout << "ERROR: input must be between 1 and 8" << std::endl;
+    std::cout << "ERROR: input must be 1" << std::endl;
     break;
   }
 }
@@ -204,16 +206,28 @@ void first_main() {
 
   First::Board board(task_listener.get(), meal_listener.get(), exception_listener.get());
 
+  std::map<std::string, unsigned int> tasks;
+
   while (true) {
     print_action_header();
     const int action = get_input<int>("Select action: ");
 
     switch (action) {
     case 1:
-      manage_tasks(board);
+      manage_tasks(board, task_listener.get(), tasks);
       break;
     case 2:
       manage_meals(board);
+      break;
+    case 3:
+      std::cout << std::endl << "Tasks:" << std::endl;
+
+      for (const auto& [key, value] : tasks) {
+        std::cout << "\t" << key << std::endl;
+      }
+
+      std::cout << std::endl;
+
       break;
     default:
       std::cout << "ERROR: input must be 1 or 2" << std::endl;

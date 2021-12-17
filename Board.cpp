@@ -2,90 +2,99 @@
 
 #include "Exception.hpp"
 
+#include <iostream> // TODO delete
+
 
 namespace First {
 
 
+unsigned int Board::current_id = 0;
+
+bool operator==(const TaskAddedEvent& left, const TaskAddedEvent& right) {
+  return left.id == right.id && left.item == right.item;
+}
+
 Board::Board(TaskListener* tl, MealListener* ml, ExceptionListener* el) :
     task_listener(tl), meal_listener(ml), exception_listener(el) {}
 
-void Board::add_task(const std::string& task) {
-  try {
-    incompleted_task_list.add(task);
-    notify_task_change();
-  } catch (const ExistingTaskException& e) {
-    exception_listener->notify("ExistingTask");
-  }
+void Board::add_task() {
+  task_list.add(++current_id);
+  task_listener->notify({current_id, task_list[current_id]});
 }
 
-void Board::erase_task(const std::string& task) {
-  try {
-    incompleted_task_list.erase(task);
-    notify_task_change();
-  } catch (const NoTaskException& e) {
-    exception_listener->notify("NoTask");
-  }
+void Board::add_task(const Date& date) {
+  task_list.add(++current_id, date);
+  task_listener->notify({current_id, task_list[current_id]});
 }
 
-void Board::edit_task(const std::string& task, const std::string& new_task) {
-  try {
-    incompleted_task_list.edit(task, new_task);
-    notify_task_change();
-  } catch (const NoTaskException& e) {
-    exception_listener->notify("NoTask");
-  } catch (const ExistingTaskException& e) {
-    exception_listener->notify("ExistingTask");
-  }
-}
+// void Board::erase_task(const std::string& task) {
+//   try {
+//     incompleted_task_list.erase(task);
+//     notify_task_change();
+//   } catch (const NoTaskException& e) {
+//     exception_listener->notify("NoTask");
+//   }
+// }
 
-void Board::move_task(const std::string& task, unsigned int position) {
-  try {
-    incompleted_task_list.move(task, position);
-    notify_task_change();
-  } catch (const NoTaskException& e) {
-    exception_listener->notify("NoTask");
-  } catch (const InvalidIndexException& e) {
-    exception_listener->notify("InvalidIndex");
-  }
-}
+// void Board::edit_task(const std::string& task, const std::string& new_task) {
+//   try {
+//     incompleted_task_list.edit(task, new_task);
+//     notify_task_change();
+//   } catch (const NoTaskException& e) {
+//     exception_listener->notify("NoTask");
+//   } catch (const ExistingTaskException& e) {
+//     exception_listener->notify("ExistingTask");
+//   }
+// }
 
-void Board::complete_task(const std::string& task) {
-  if (!incompleted_task_list.contains(task)) {
-    exception_listener->notify("NoTask");
-    return;
-  }
+// void Board::move_task(const std::string& task, unsigned int position) {
+//   try {
+//     incompleted_task_list.move(task, position);
+//     notify_task_change();
+//   } catch (const NoTaskException& e) {
+//     exception_listener->notify("NoTask");
+//   } catch (const InvalidIndexException& e) {
+//     exception_listener->notify("InvalidIndex");
+//   }
+// }
 
-  incompleted_task_list.erase(task);
-  completed_task_list.add(task);
+// void Board::complete_task(const std::string& task) {
+//   if (!incompleted_task_list.contains(task)) {
+//     exception_listener->notify("NoTask");
+//     return;
+//   }
 
-  notify_task_change();
-}
+//   incompleted_task_list.erase(task);
+//   completed_task_list.add(task);
 
-void Board::incomplete_task(const std::string& task) {
-  if (!completed_task_list.contains(task)) {
-    exception_listener->notify("NoTask");
-    return;
-  }
+//   notify_task_change();
+// }
 
-  completed_task_list.erase(task);
-  incompleted_task_list.add(task);
+// void Board::incomplete_task(const std::string& task) {
+//   if (!completed_task_list.contains(task)) {
+//     exception_listener->notify("NoTask");
+//     return;
+//   }
 
-  notify_task_change();
-}
+//   completed_task_list.erase(task);
+//   incompleted_task_list.add(task);
 
-void Board::clear_complete() {
-  cleared_tasks = completed_task_list.to_string();
-  completed_task_list.clear();
-  notify_task_change();
-}
+//   notify_task_change();
+// }
 
-void Board::undo_clear() {
-  for (const auto& task : cleared_tasks) {
-    completed_task_list.add(task);
-  }
+// void Board::clear_complete() {
+//   cleared_tasks = completed_task_list.to_string();
+//   completed_task_list.clear();
+//   notify_task_change();
+// }
 
-  notify_task_change();
-}
+// void Board::undo_clear() {
+//   for (const auto& task : cleared_tasks) {
+//     completed_task_list.add(task);
+//   }
+
+//   notify_task_change();
+// }
 
 void Board::add_meal(const Date& date, MealType type, const std::string& meal) {
   meal_list.add(date, type, meal);
@@ -121,19 +130,19 @@ void Board::edit_meal(const Date& date, MealType type, const Date& new_date, Mea
   }
 }
 
-void Board::notify_task_change() {
-  std::vector<std::pair<std::string, std::string>> task_statuses;
+// void Board::notify_task_change() {
+//   std::vector<std::pair<std::string, std::string>> task_statuses;
 
-  for (const auto& task : incompleted_task_list.to_string()) {
-    task_statuses.push_back(std::make_pair(task, "Incomplete"));
-  }
+//   for (const auto& task : incompleted_task_list.to_string()) {
+//     task_statuses.push_back(std::make_pair(task, "Incomplete"));
+//   }
 
-  for (const auto& task : completed_task_list.to_string()) {
-    task_statuses.push_back(std::make_pair(task, "Complete"));
-  }
+//   for (const auto& task : completed_task_list.to_string()) {
+//     task_statuses.push_back(std::make_pair(task, "Complete"));
+//   }
 
-  task_listener->notify(task_statuses);
-}
+//   task_listener->notify(task_statuses);
+// }
 
 
 } // end namespace First
